@@ -1,0 +1,16 @@
+# Generated copy of the shared web frontend; rebuild from ../frontend.
+www/
+
+# Node dependencies
+node_modules/
+
+# Android/Gradle generated files
+android/.gradle/
+android/.idea/
+android/.kotlin/
+android/build/
+android/app/build/
+android/local.properties
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/

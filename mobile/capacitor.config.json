@@ -1,0 +1,13 @@
+{
+  "appId": "com.periodly.schooltimetable",
+  "appName": "PERIODLY",
+  "webDir": "www",
+  "backgroundColor": "#ffffff",
+  "server": {
+    "hostname": "localhost",
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

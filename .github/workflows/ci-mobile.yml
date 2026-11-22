@@ -1,0 +1,34 @@
+name: Mobile Wrapper Check
+
+on:
+  push:
+    paths:
+      - 'mobile/**'
+      - 'frontend/**'
+      - '.github/workflows/ci-mobile.yml'
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - 'frontend/**'
+      - '.github/workflows/ci-mobile.yml'
+  workflow_dispatch:
+
+jobs:
+  capacitor-config:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Install Capacitor packages
+        run: npm install --no-audit --no-fund
+      - name: Validate Capacitor configuration
+        run: |
+          node -e "const c=require('./capacitor.config.json'); if(c.appId!=='com.periodly.schooltimetable'||c.webDir!=='www'||c.server?.androidScheme!=='https') process.exit(1); console.log('Capacitor config OK')"
+          npx cap --version
+      - name: Confirm generated web bundle is not committed
+        run: test ! -d www

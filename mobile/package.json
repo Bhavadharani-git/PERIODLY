@@ -1,0 +1,19 @@
+{
+  "name": "periodly-android",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Android wrapper for the PERIODLY school timetable scheduler",
+  "scripts": {
+    "cap:add:android": "cap add android",
+    "cap:sync:android": "cap sync android",
+    "cap:open:android": "cap open android",
+    "cap:run:android": "cap run android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.2",
+    "@capacitor/core": "8.6.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.2"
+  }
+}
