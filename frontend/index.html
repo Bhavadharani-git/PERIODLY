@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<title>PERIODLY – Intelligent School Timetable Scheduler</title>
+<style>
+:root{--navy:#0b2560;--navy2:#123a8c;--bg:#fff;--card:#fff;--line:#e4e9f3;--text:#14223f;--mut:#6a7792;--cell:#f6f8fc;--brk:#d9d6f7;--sel:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{color-scheme:light}
+
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,"Segoe UI",system-ui,-apple-system,Arial,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+header{background:var(--card);color:var(--text);padding:20px 28px 8px;display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+.logo{font-size:24px;font-weight:700;letter-spacing:.5px;line-height:1.1}.logo small{display:block;font-size:13px;font-weight:400;letter-spacing:0;margin-top:4px;color:var(--mut)}
+.ai{border-left:1px solid var(--line);padding-left:22px;font-size:13px;color:var(--mut)}.ai b{color:var(--text)}
+.bar{background:var(--card);padding:14px 28px 18px;display:flex;gap:22px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.bar label{font-weight:700;display:flex;align-items:center;gap:8px}
+select{background:var(--sel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;min-width:0;max-width:100%}
+.btn{border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:700;color:#fff;cursor:pointer}
+.save{background:#12a150}.gen{background:linear-gradient(90deg,#7a1fe0,#3c6df0)}.exp{background:var(--card);color:var(--navy2);border:2px solid var(--navy2)}
+.menu{position:relative}.drop{display:none;position:absolute;right:0;top:110%;background:var(--card);border:1px solid var(--line);border-radius:8px;min-width:190px;z-index:5;box-shadow:0 6px 18px #0003}
+.drop.open{display:block}.drop button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--text);padding:10px 14px;font:inherit;cursor:pointer}.drop button:hover{background:var(--cell)}
+main{display:grid;grid-template-columns:260px minmax(0,1fr) 280px;gap:28px;padding:24px 28px}
+aside.cfg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;color:var(--text);align-self:start}
+.cfg h2{margin:2px 8px 14px;font-size:17px;font-weight:700}
+.cfg button{width:100%;display:flex;align-items:center;gap:12px;background:none;border:0;color:var(--text);border-radius:10px;padding:11px 12px;margin-bottom:2px;font:inherit;font-weight:500;cursor:pointer;text-align:left}.cfg button:hover{background:var(--cell)}.cfg .c{color:var(--mut)}
+.cfg button span.c{margin-left:auto}.cfg button.on{background:#e8f0fe;color:var(--navy2);font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+.stat{border-radius:14px;padding:20px 16px;display:flex;align-items:center;gap:12px;color:#12234d}
+.stat b{font-size:28px;display:block;line-height:1}.stat i{font-style:normal;font-size:26px}
+.s1{background:#cfe6fb}.s2{background:#cdf3dc}.s3{background:#e6defa}.s4{background:#fdf0c4}.s5{background:#fcdde5}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-top:28px;padding:20px;overflow:hidden}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--line);margin:-20px -20px 22px}
+.tabs button{background:var(--card);border:0;padding:16px 6px;font:inherit;font-weight:700;color:var(--text);cursor:pointer}
+.tabs button.on{color:var(--navy2);box-shadow:inset 0 -3px 0 var(--navy2)}
+.filters{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:22px}.filters label{font-weight:700}
+.tool{border:1px solid var(--line);background:#dcebff;color:#12234d;border-radius:8px;padding:9px 13px;font:inherit;font-weight:700;cursor:pointer}
+.tool.on{background:var(--navy2);color:#fff}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th{background:var(--cell);color:var(--navy2);padding:14px;border:1px solid var(--line);font-weight:600}
+td{border:1px solid var(--line);text-align:center;padding:11px 6px;color:#aab3c7;height:54px}
+td.p{background:var(--cell);font-weight:700;color:var(--text)}
+tr.brk td{background:var(--brk);font-weight:700;color:var(--text);height:34px}
+.timetable-cell{min-width:105px;vertical-align:middle}
+.entry-card{display:block;width:100%;border:1px solid #cbd8ef;border-radius:8px;background:#eef4ff;color:#18366f;padding:7px 6px;margin:2px 0;text-align:center;cursor:pointer;font:inherit;font-weight:700}
+.entry-card small{font-weight:500;color:#5e6d87}
+.entry-card.locked{background:#e8f7ed;border-color:#8ac6a0}
+.entry-card.selected{outline:3px solid #f0a020;outline-offset:1px}
+.empty-slot{color:#aab3c7;min-height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:6px}
+.filters.editing{background:#f4f7ff;border:1px dashed #8aa7e8;padding:10px;border-radius:10px}
+.edit td.slot{cursor:pointer;outline:1px dashed #3c6df0;outline-offset:-3px}
+.side .box{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:24px;padding-bottom:8px;overflow:hidden}
+.side h3{margin:0;color:var(--text);padding:18px 16px 8px;font-size:15px;font-weight:700}
+.row{display:flex;justify-content:space-between;padding:9px 16px;font-weight:500}.row b{font-size:15px}
+.red{color:#d92d20}.org{color:#e8890c}
+.q{display:block;width:calc(100% - 20px);margin:10px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;font-weight:600;text-align:left;cursor:pointer}
+.empty{padding:34px 12px;text-align:center;color:var(--mut)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:9}#toast.show{opacity:1}
+@media(max-width:1180px){main{grid-template-columns:240px minmax(0,1fr)}.side{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.side .box{margin:0}.cards{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){main{grid-template-columns:1fr;padding:12px}header,.bar{padding:10px 12px}.cfg{display:grid;grid-template-columns:1fr 1fr;gap:6px}.cfg h2{grid-column:1/-1}.cfg button{margin:0;padding:10px 8px;font-size:13px}.cards{grid-template-columns:1fr 1fr}.tabs button{font-size:12px;padding:12px 2px}.bar>*{flex:1 1 100%}.bar label{flex-wrap:wrap}.btn,select{width:100%}.ai{border:0;padding:0}}
+.cards{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+@media(max-width:1180px){header,.bar,main{padding-left:20px;padding-right:20px}main{gap:20px}}
+@media(max-width:900px){main{grid-template-columns:minmax(0,1fr)}.cfg{display:block;padding:10px}.cfg h2{display:none}#nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}.cfg button{width:auto;flex:none;white-space:nowrap;border:1px solid var(--line);padding:10px 14px;margin:0}.cfg .c{display:none}}
+@media(max-width:760px){header{padding:14px 14px 4px;gap:12px}.logo{font-size:20px}.ai{display:none}.bar{padding:10px 14px 14px;gap:10px}.bar>span{display:none}.menu{flex:1 1 100%}.drop{left:0;right:0}main{padding:14px;gap:16px}.cards{grid-template-columns:1fr 1fr;gap:10px}.stat{padding:14px 12px;gap:8px}.stat b{font-size:24px}.panel{padding:14px;margin-top:16px}.tabs{display:flex;overflow-x:auto;margin:-14px -14px 16px}.tabs button{flex:none;white-space:nowrap;padding:14px 16px;font-size:13px}.filters{gap:8px}.filters label{width:100%;margin-bottom:-4px}.filters .tool{flex:1 1 100%}.btn,.tool,select{min-height:44px}.side{grid-template-columns:1fr}th,td{padding:10px 4px}td{height:46px}#toast{width:calc(100% - 28px);text-align:center}}
+
+.config-workspace{margin-top:22px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px}
+.config-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.config-head h2{margin:0;font-size:18px}.primary{background:#2457c5;color:#fff;border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}
+.config-table{width:100%;border-collapse:collapse;min-width:540px}.config-table th,.config-table td{border:1px solid var(--line);padding:10px;text-align:left;color:var(--text)}
+.config-table th{background:var(--cell)}.action-btn{border:1px solid var(--line);background:#fff;border-radius:6px;padding:6px 9px;margin-right:5px;cursor:pointer}
+.dialog-backdrop{position:fixed;inset:0;background:#0b173b77;display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.dialog-backdrop.open{display:flex}.dialog{background:#fff;border-radius:14px;padding:22px;width:min(520px,100%);max-height:90vh;overflow:auto}
+.dialog h3{margin:0 0 16px}.dialog label{display:block;font-weight:600;margin:10px 0 5px}.dialog input,.dialog select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit}
+.dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.muted-note{color:var(--mut);padding:20px;text-align:center}
+
+.generation-report{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;color:var(--text)}
+.generation-report .report-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.generation-report .report-head h3{margin:0;font-size:18px}
+.generation-report .report-close{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:8px;padding:7px 11px;cursor:pointer}
+.generation-report .report-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin:12px 0 16px}
+.generation-report .metric{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--cell)}
+.generation-report .metric b{display:block;font-size:23px;line-height:1.3}.generation-report .metric span{font-size:12px;color:var(--mut)}
+.generation-report .report-note{padding:10px 12px;border-radius:9px;background:var(--cell);margin:10px 0;color:var(--text)}
+.generation-report .report-warnings{margin:8px 0 14px;padding-left:21px;color:var(--mut)}
+.generation-report .report-table-wrap{overflow:auto}.generation-report table{width:100%;border-collapse:collapse;min-width:560px}
+.generation-report th,.generation-report td{padding:9px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}
+.generation-report th{color:var(--mut);background:var(--cell)}
+.generation-report .ok{color:#14804a;font-weight:700}.generation-report .warn{color:#ad6b00;font-weight:700}
+@media(max-width:760px){.generation-report{padding:13px}.generation-report .report-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+.quick-wrap{display:grid;gap:18px}
+.quick-intro{background:#f2f6ff;border:1px solid #dce6fb;border-radius:12px;padding:15px 17px;color:#22365f}
+.quick-intro b{display:block;font-size:15px;margin-bottom:4px}
+.quick-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.quick-stat{border:1px solid var(--line);border-radius:10px;padding:11px;background:var(--card)}
+.quick-stat b{display:block;font-size:22px;color:var(--navy2)}.quick-stat span{font-size:12px;color:var(--mut)}
+.quick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.quick-card{border:1px solid var(--line);border-radius:12px;padding:15px;background:var(--card);min-width:0}
+.quick-card h3{margin:0 0 5px;font-size:15px}.quick-card p{margin:0 0 10px;color:var(--mut);font-size:12px;min-height:36px}
+.quick-card textarea{width:100%;min-height:140px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:10px;font:13px/1.5 ui-monospace,Consolas,monospace;color:var(--text);background:var(--card)}
+.quick-fields{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}.quick-fields label{font-size:12px;color:var(--mut);font-weight:600}.quick-fields input,.quick-fields select{border:1px solid var(--line);border-radius:7px;padding:7px 8px;font:inherit;max-width:120px}
+.quick-action{border:0;border-radius:8px;background:var(--navy2);color:white;font:inherit;font-weight:700;padding:9px 12px;cursor:pointer}.quick-action.secondary{background:#edf3ff;color:var(--navy2);border:1px solid #d6e2fa}.quick-action:disabled{opacity:.55;cursor:wait}
+.quick-map-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}.quick-map{border-collapse:collapse;width:100%;min-width:640px}.quick-map th,.quick-map td{border:1px solid var(--line);padding:9px;text-align:center;font-size:12px}.quick-map th:first-child,.quick-map td:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:1}.quick-map th{background:var(--cell);color:var(--navy2)}.quick-map input{width:17px;height:17px;accent-color:var(--navy2)}.quick-legend{font-size:12px;color:var(--mut);margin:8px 0}
+.quick-bottom{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.quick-status{color:var(--mut);font-size:13px}.quick-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.quick-step{padding:12px;border-radius:10px;background:var(--cell);font-size:12px;color:var(--mut)}.quick-step b{display:block;color:var(--text);font-size:13px;margin-bottom:3px}
+@media(max-width:1000px){.quick-grid{grid-template-columns:1fr 1fr}.quick-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){.quick-grid,.quick-steps{grid-template-columns:1fr}.quick-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-card p{min-height:0}}
+
+</style></head>
+<body>
+<header><div class="logo">🗓️ PERIODLY<small>Intelligent School Timetable Scheduler</small></div><div class="ai">🤖 <b>AI-Powered</b><br>Timetable Generation</div></header>
+<div class="bar">
+<label>🏫 School <select id="school"><option value="">Select / Add School</option></select></label>
+<label>📅 Academic Year <select><option>Select Year</option></select></label>
+<label>🗓 Working Days <select><option>Mon – Sat</option><option>Mon – Fri</option></select></label>
+<span style="flex:1"></span>
+<button class="btn save" onclick="toast('Save needs a backend connection')">💾 Save</button>
+<button class="btn gen" onclick="toast('Add classes, teachers and subjects first')">✨ AI Generate Timetable</button>
+<div class="menu"><button class="btn exp" id="expBtn">⬇ Export ▾</button><div class="drop" id="drop"><button type="button" data-export="excel">Export Excel Workbook (.xlsx)</button><button type="button" data-export="pdf">Print / Save as PDF</button></div></div>
+</div>
+<main>
+<aside class="cfg"><h2>⚙️ Configuration</h2><div id="nav"></div></aside>
+<section>
+<div class="cards">
+<div class="stat s1"><i>👥</i><div><b>0</b>Classes</div></div>
+<div class="stat s2"><i>🧑‍🏫</i><div><b style="color:#0a7a3a">0</b>Teachers</div></div>
+<div class="stat s3"><i>📖</i><div><b style="color:#5b21b6">0</b>Subjects</div></div>
+<div class="stat s4"><i>🚪</i><div><b>0</b>Rooms</div></div>
+<div class="stat s5"><i>🗓</i><div><b style="color:#b4143b">0</b>Total Periods</div></div>
+</div>
+<div class="panel">
+<div class="tabs" id="tabs"></div>
+<div class="filters">
+<label>View By</label><select id="viewBy"><option>Class</option><option>Teacher</option></select>
+<label id="entityLabel">Class</label><select id="entityFilter"><option value="">All Classes</option></select>
+<label id="sectionLabel">Section</label><select id="sectionFilter"><option value="">All Sections</option></select>
+<label for="optimizationAttempts">AI optimization time</label><select id="optimizationAttempts"><option value="10">Standard · 10 sec</option><option value="20" selected>Deep · 20 sec</option><option value="30">Extended · 30 sec</option></select>
+<button class="tool" id="edit">✏️ Edit Mode</button><button class="tool" id="lock">🔒 Lock Selected</button><button class="tool" id="regenerate">🔄 Regenerate</button>
+</div>
+<div id="view" class="scroll"></div>
+</div>
+<div id="generationReport" class="generation-report" style="display:none" aria-live="polite"></div>
+<div id="configWorkspace" class="config-workspace" style="display:none">
+  <div class="config-head"><h2 id="configTitle">Configuration</h2><button class="primary" id="addConfig">＋ Add New</button></div>
+  <div class="scroll" id="configContent"></div>
+</div>
+</section>
+<div class="side">
+<div class="box"><h3>📈 Scheduling Status</h3>
+<div class="row"><span>✅ Scheduled Periods</span><b class="red" style="color:#0a7a3a">0</b></div>
+<div class="row"><span>⚪ Unallocated Periods</span><b>0</b></div>
+<div class="row"><span>🔺 Teacher Conflicts</span><b class="red">0</b></div>
+<div class="row"><span>🔶 Class Conflicts</span><b class="org">0</b></div>
+<div class="row"><span>🟣 Room Conflicts</span><b>0</b></div></div>
+<div class="box"><h3>📊 Workload</h3>
+<div class="row"><span>Avg. Teacher Load</span><b>0</b></div>
+<div class="row"><span>Max. Load</span><b>0</b></div>
+<div class="row"><span>Min. Load</span><b>0</b></div></div>
+<div class="box"><h3>📄 Quick Reports</h3>
+<button class="q" data-t="4">👥 Class-wise Timetable</button>
+<button class="q" data-t="4">🧑‍🏫 Teacher-wise Timetable</button>
+<button class="q" data-t="4">📊 Teacher Workload Report</button>
+<button class="q" data-t="4">⚠️ Conflict Report</button></div>
+</div>
+</main>
+<div class="dialog-backdrop" id="configDialog"><div class="dialog">
+<h3 id="dialogTitle">Add record</h3><form id="configForm"><div id="formFields"></div>
+<div class="dialog-actions"><button type="button" class="action-btn" id="cancelDialog">Cancel</button><button class="primary" type="submit">Save</button></div></form>
+</div></div>
+<div class="dialog-backdrop" id="timetableDialog"><div class="dialog">
+<h3 id="timetableDialogTitle">Edit timetable lesson</h3>
+<form id="timetableForm"><div id="timetableFormFields"></div>
+<div class="dialog-actions"><button type="button" class="action-btn" id="cancelTimetableDialog">Cancel</button><button class="primary" type="submit">Save Lesson</button></div></form>
+</div></div>
+<div id="toast"></div>
+
+<script src="./config.js"></script>
+<script>
+const API = String(
+  window.PERIODLY_CONFIG?.API_BASE_URL ||
+  (window.location.protocol === 'file:' ? 'http://127.0.0.1:8000/api' : `${window.location.origin}/api`)
+).replace(/\/+$/, '');
+const PERIODLY_KEY_STORAGE = 'periodly_admin_api_key';
+let periodlyKeyPrompt = null;
+async function authorizedFetch(url, options={}){
+  const send = (key='') => {
+    const headers = new Headers(options.headers || {});
+    if(key) headers.set('X-API-Key', key);
+    return fetch(url, {...options, headers});
+  };
+  let key = sessionStorage.getItem(PERIODLY_KEY_STORAGE) || '';
+  let response = await send(key);
+  if(response.status === 401){
+    sessionStorage.removeItem(PERIODLY_KEY_STORAGE);
+    if(!periodlyKeyPrompt){
+      periodlyKeyPrompt = Promise.resolve(window.prompt('Enter the PERIODLY administrator access key (provided by your deployment administrator):'))
+        .then(value => String(value || '').trim())
+        .finally(() => { periodlyKeyPrompt = null; });
+    }
+    key = await periodlyKeyPrompt;
+    if(key){
+      sessionStorage.setItem(PERIODLY_KEY_STORAGE, key);
+      response = await send(key);
+      if(response.status === 401) sessionStorage.removeItem(PERIODLY_KEY_STORAGE);
+    }
+  }
+  return response;
+}
+const items = [
+  ["🏛️","School Settings","schools"],["👥","Classes & Sections","classes"],
+  ["🧑‍🏫","Teachers","teachers"],["📖","Subjects","subjects"],["🚪","Rooms","rooms"],
+  ["🕒","Period & Break Timing","timings"],["🔗","Teacher–Subject Map","mappings"],
+  ["📋","Weekly Requirements","requirements"],["📅","Teacher Availability","availability"],
+  ["🧑‍🏫","Teacher Preferences","teacher_preferences"],["🧠","Subject Scheduling Profiles","subject_profiles"]
+];
+const tabs=["🗓 Timetable","👤 Teacher Load","👥 Class View","🎓 Teacher View","📊 Reports"];
+const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const $=id=>document.getElementById(id);
+let tab=0, editing=false, locked=false, currentModule=null, editingId=null, schools=[], selectedSchoolId="";
+let cache={classes:[],teachers:[],subjects:[],rooms:[],timings:[],mappings:[],requirements:[],availability:[]};
+let timetableEntries=[];
+let selectedEntryId=null;
+let timetableEditTarget=null;
+
+const schemas={
+  schools:[['name','School Name','text'],['academic_year','Academic Year','text'],['working_days','Working Days (comma separated)','text'],['periods_per_day','Teaching Periods Per Day','number']],
+  classes:[['class_name','Class Name','text'],['section','Section','text'],['strength','Student Strength','number']],
+  teachers:[['name','Teacher Name','text'],['max_periods','Maximum Weekly Periods','number'],['available_days','Available Days (comma separated)','text']],
+  subjects:[['name','Subject Name','text'],['code','Subject Code','text'],['weekly_periods','Weekly Periods','number'],['requires_double','Requires Double Period','checkbox']],
+  rooms:[['name','Room Name / Number','text'],['capacity','Capacity','number']],
+  timings:[['period_number','Slot Number','number'],['label','Label','text'],['start_time','Start Time (HH:MM)','text'],['end_time','End Time (HH:MM)','text'],['is_break','Is Break','checkbox']],
+  mappings:[['teacher_id','Teacher','select-teacher'],['subject_id','Subject','select-subject']],
+  requirements:[['class_section_id','Class / Section','select-class'],['subject_id','Subject','select-subject'],['periods_per_week','Periods Per Week','number']],
+  availability:[['teacher_id','Teacher','select-teacher'],['day','Day','select-day'],['period','Teaching Period Number','number'],['available','Available?','checkbox']],
+  teacher_preferences:[['teacher_id','Teacher','select-teacher'],['preferred_days','Preferred Days (comma-separated; blank = no preference)','text'],['preferred_periods','Preferred Periods (e.g. 1,2,3; blank = no preference)','text'],['preferred_time_of_day','Preferred Time of Day','select-time-band'],['avoid_first_period','Avoid First Period','checkbox'],['avoid_last_period','Avoid Last Period','checkbox'],['max_consecutive_periods','Preferred Maximum Consecutive Periods','number']],
+  subject_profiles:[['subject_id','Subject','select-subject'],['difficulty','Difficulty (1 easy – 5 high)','number'],['preferred_time_of_day','Preferred Time of Day','select-subject-time-band'],['max_periods_per_day','Preferred Maximum Periods Per Day','number'],['min_gap_days','Preferred Minimum Gap Between Days','number']]
+};
+const specialModules=['timings','mappings','requirements','availability','teacher_preferences','subject_profiles'];
+const endpointAliases={teacher_preferences:'teacher-preferences',subject_profiles:'subject-profiles'};
+
+function toast(message){
+  const t=$('toast'); t.textContent=message; t.classList.add('show');
+  clearTimeout(t.h); t.h=setTimeout(()=>t.classList.remove('show'),3000);
+}
+function readableError(err){
+  const value = err?.message ?? err?.detail ?? err;
+  if(typeof value==='string') return value;
+  try{return JSON.stringify(value);}catch(_){return String(value);}
+}
+async function api(path, options={}){
+  const response=await authorizedFetch(API+path,{
+    ...options,
+    headers:{'Content-Type':'application/json',...(options.headers||{})}
+  });
+  const data=await response.json().catch(()=>({detail:response.statusText}));
+  if(!response.ok){
+    const detail=data?.detail ?? data?.message ?? data;
+    const message=typeof detail==='string' ? detail : JSON.stringify(detail);
+    throw new Error(message || `Request failed (${response.status})`);
+  }
+  return data;
+}
+function schoolId(){
+  // Never send placeholder text such as "Select / Add School" to the API.
+  const raw=selectedSchoolId || $('school')?.value || '';
+  const value=String(raw).trim();
+  return /^\d+$/.test(value) ? value : '';
+}
+function schoolQuery(){
+  return schoolId() ? `?school_id=${encodeURIComponent(schoolId())}` : '';
+}
+function showMain(){
+  document.querySelector('.cards').style.display='grid';
+  document.querySelector('.panel').style.display='block';
+  $('configWorkspace').style.display='none';
+  $('generationReport').style.display='none';
+}
+function showConfig(){
+  $('generationReport').style.display='none';
+  document.querySelector('.cards').style.display='none';
+  document.querySelector('.panel').style.display='none';
+  $('configWorkspace').style.display='block';
+}
+function currentEndpoint(){
+  const endpoint=endpointAliases[currentModule]||currentModule;
+  return specialModules.includes(currentModule) ? `/${endpoint}` : `/config/${currentModule}`;
+}
+async function getSchoolDataScore(id){
+  // Prefer the school that already owns PERIODLY data, rather than the first
+  // row returned by the API (which may be a newly-created empty duplicate).
+  const endpoints=['classes','teachers','subjects','rooms','timings','mappings','requirements','timetable'];
+  const counts=await Promise.all(endpoints.map(async endpoint=>{
+    try{
+      const result=await api(`/${endpoint}?school_id=${encodeURIComponent(id)}`);
+      if(Array.isArray(result)) return result.length;
+      if(Array.isArray(result?.value)) return result.value.length;
+      if(Array.isArray(result?.items)) return result.items.length;
+      return 0;
+    }catch(_){ return 0; }
+  }));
+  return counts.reduce((sum,count)=>sum+count,0);
+}
+
+async function loadSchools(preferredId=null){
+  const schoolSelect=$('school');
+  try{
+    const result=await api('/schools');
+    if(!Array.isArray(result)) throw new Error('The schools API did not return a list.');
+    schools=result;
+    const preferred=String((preferredId!==null && preferredId!==undefined && String(preferredId).trim()!=='') ? preferredId : (selectedSchoolId || schoolSelect.value || '')).trim();
+    schoolSelect.innerHTML='<option value="">Select / Add School</option>'+schools.map(s=>`<option value="${Number(s.id)}">${escapeHtml(s.name)} (ID ${Number(s.id)})</option>`).join('');
+
+    let chosen='';
+    if(schools.some(s=>String(s.id)===preferred)){
+      // Respect an explicitly selected school whenever it still exists.
+      chosen=preferred;
+    }else if(schools.length){
+      // On first load, inspect each school's records and select the populated one.
+      const ranked=await Promise.all(schools.map(async school=>({
+        id:String(school.id), score:await getSchoolDataScore(school.id)
+      })));
+      ranked.sort((a,b)=>b.score-a.score || Number(a.id)-Number(b.id));
+      chosen=ranked[0]?.id || String(schools[0].id);
+      if((ranked[0]?.score||0)>0){
+        const selected=schools.find(s=>String(s.id)===chosen);
+        console.info(`PERIODLY selected populated school: ${selected?.name||'School'} (ID ${chosen}), data records ${ranked[0].score}`);
+      }
+    }
+
+    selectedSchoolId=/^\d+$/.test(chosen)?chosen:'';
+    schoolSelect.value=selectedSchoolId;
+    syncSchoolHeader();
+    if(selectedSchoolId){
+      await refreshDashboard();
+      if(currentModule && currentModule!=='schools') await loadConfig();
+    }else{
+      timetableEntries=[];
+      cache={classes:[],teachers:[],subjects:[],rooms:[],timings:[],mappings:[],requirements:[],availability:[]};
+      render();
+      if(currentModule && currentModule!=='schools') $('configContent').innerHTML='<div class="muted-note">No school found. Open School Settings and add a school first.</div>';
+    }
+  }catch(e){
+    selectedSchoolId='';
+    schoolSelect.innerHTML='<option value="">Select / Add School</option>';
+    console.error('PERIODLY school loading failed:',e);
+    toast('Could not load schools: '+readableError(e));
+  }
+}
+
+function syncSchoolHeader(){
+  const s=schools.find(x=>String(x.id)===String(schoolId()));
+  const selects=document.querySelectorAll('.bar label select');
+  if(selects[1] && s){
+    selects[1].innerHTML=`<option>${escapeHtml(s.academic_year||'Academic Year')}</option>`;
+  }
+  if(selects[2] && s){
+    const wd=(s.working_days||'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday').split(',');
+    selects[2].innerHTML=`<option>${wd.map(x=>x.trim().slice(0,3)).join(' – ')}</option>`;
+  }
+}
+function escapeHtml(value){
+  return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+async function refreshDashboard(){
+  if(!schoolId()) return;
+  try{
+    const [classes,teachers,subjects,rooms,timings,entries,requirements,mappings,availability]=await Promise.all([
+      api('/classes'+schoolQuery()),api('/teachers'+schoolQuery()),api('/subjects'+schoolQuery()),
+      api('/rooms'+schoolQuery()),api('/timings'+schoolQuery()),api('/timetable'+schoolQuery()),
+      api('/requirements'+schoolQuery()),api('/mappings'+schoolQuery()),api('/availability'+schoolQuery())
+    ]);
+    cache.classes=classes; cache.teachers=teachers; cache.subjects=subjects;
+    cache.rooms=rooms; cache.timings=timings; cache.requirements=requirements;
+    cache.mappings=mappings; cache.availability=availability;
+    timetableEntries=entries;
+    if(selectedEntryId && !entries.some(entry=>Number(entry.id)===Number(selectedEntryId))) selectedEntryId=null;
+    updateLockButton();
+
+    const stats=[classes.length,teachers.length,subjects.length,rooms.length,timings.filter(x=>!x.is_break).length];
+    document.querySelectorAll('.cards .stat b').forEach((el,i)=>{el.textContent=stats[i]??0;});
+    populateEntityFilter();
+    updateAnalytics();
+    render();
+  }catch(e){console.warn('Dashboard refresh:',readableError(e));}
+}
+
+function populateEntityFilter(){
+  const view=$('viewBy')?.value||'Class';
+  const entity=$('entityFilter');
+  if(!entity) return;
+  const previous=entity.value;
+  if(view==='Teacher'){
+    $('entityLabel').textContent='Teacher';
+    entity.innerHTML='<option value="">All Teachers</option>'+
+      cache.teachers.map(t=>`<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
+    if(cache.teachers.some(t=>String(t.id)===previous)) entity.value=previous;
+    $('sectionLabel').style.display='none';
+    $('sectionFilter').style.display='none';
+  }else{
+    $('entityLabel').textContent='Class';
+    entity.innerHTML='<option value="">All Classes</option>'+
+      cache.classes.map(c=>`<option value="${c.id}">${escapeHtml(c.class_name)} - ${escapeHtml(c.section)}</option>`).join('');
+    if(cache.classes.some(c=>String(c.id)===previous)) entity.value=previous;
+    $('sectionLabel').style.display='';
+    $('sectionFilter').style.display='';
+    const oldSection=$('sectionFilter').value;
+    const sections=[...new Set(cache.classes.map(c=>c.section).filter(Boolean))];
+    $('sectionFilter').innerHTML='<option value="">All Sections</option>'+
+      sections.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+    if(sections.includes(oldSection)) $('sectionFilter').value=oldSection;
+  }
+}
+
+function getAnalytics(){
+  const entries=timetableEntries||[];
+  const countConflicts=(keyFn)=>{
+    const groups=new Map();
+    entries.forEach(entry=>{
+      const key=keyFn(entry);
+      if(key===null || key===undefined || key==='') return;
+      groups.set(key,(groups.get(key)||0)+1);
+    });
+    return [...groups.entries()].filter(([,count])=>count>1)
+      .reduce((sum,[,count])=>sum+count-1,0);
+  };
+  const teacherConflicts=countConflicts(e=>`${e.teacher_id}|${e.day}|${e.period}`);
+  const classConflicts=countConflicts(e=>`${e.class_section_id}|${e.day}|${e.period}`);
+  const roomConflicts=countConflicts(e=>e.room_id?`${e.room_id}|${e.day}|${e.period}`:null);
+
+  const allocations=[];
+  for(const cls of cache.classes){
+    for(const subject of cache.subjects){
+      const required=Math.max(0,Number(subject.weekly_periods)||0);
+      const allocated=entries.filter(e=>e.class_section_id===cls.id && e.subject_id===subject.id).length;
+      allocations.push({classId:cls.id,className:cls.class_name,section:cls.section,
+        subjectId:subject.id,subjectName:subject.name,required,allocated,
+        remaining:Math.max(0,required-allocated)});
+    }
+  }
+  const unallocated=allocations.filter(x=>x.remaining>0);
+  const loads=cache.teachers.map(teacher=>({
+    id:teacher.id,name:teacher.name,max:Number(teacher.max_periods)||0,
+    assigned:entries.filter(e=>e.teacher_id===teacher.id).length
+  })).sort((a,b)=>b.assigned-a.assigned || a.name.localeCompare(b.name));
+  const values=loads.map(x=>x.assigned);
+  return {
+    teacherConflicts,classConflicts,roomConflicts,allocations,unallocated,loads,
+    average:values.length?(values.reduce((a,b)=>a+b,0)/values.length):0,
+    max:values.length?Math.max(...values):0,
+    min:values.length?Math.min(...values):0
+  };
+}
+function updateAnalytics(){
+  const a=getAnalytics();
+  const nodes=document.querySelectorAll('.side .box .row b');
+  const values=[
+    timetableEntries.length,
+    a.unallocated.reduce((sum,x)=>sum+x.remaining,0),
+    a.teacherConflicts,a.classConflicts,a.roomConflicts,
+    a.average.toFixed(1),a.max,a.min
+  ];
+  nodes.forEach((node,i)=>{if(values[i]!==undefined)node.textContent=values[i];});
+}
+
+$('nav').innerHTML=
+  `<button id="dashboardNav" class="on">🗓 Timetable Dashboard<span class="c">›</span></button>`+
+  `<button id="quickSetupNav">⚡ Quick Setup<span class="c">›</span></button>`+
+  items.map((x,i)=>`<button data-i="${i}">${x[0]} ${x[1]}<span class="c">›</span></button>`).join('');
+
+$('dashboardNav').onclick=async()=>{
+  currentModule=null;
+  editingId=null;
+  [...$('nav').children].forEach(x=>x.classList.remove('on'));
+  $('dashboardNav').classList.add('on');
+  showMain();
+  if(schoolId()) await refreshDashboard();
+};
+
+$('quickSetupNav').onclick=async()=>{
+  currentModule='quick_setup';
+  editingId=null;
+  [...$('nav').children].forEach(x=>x.classList.remove('on'));
+  $('quickSetupNav').classList.add('on');
+  showConfig();
+  $('configTitle').textContent='⚡ Quick Setup';
+  $('addConfig').style.display='none';
+  if(!schoolId()) await loadSchools();
+  if(!schoolId()){
+    $('configContent').innerHTML='<div class="muted-note">Select or create a school first.</div>';
+    return;
+  }
+  await refreshDashboard();
+  renderQuickSetup();
+};
+
+$('nav').onclick=async e=>{
+  const button=e.target.closest('button');
+  if(!button || button.id==='dashboardNav' || button.id==='quickSetupNav')return;
+  [...$('nav').children].forEach(x=>x.classList.remove('on'));
+  button.classList.add('on');
+  const item=items[Number(button.dataset.i)];
+  currentModule=item[2];
+  editingId=null;
+  showConfig();
+  $('configTitle').textContent=item[1];
+  $('addConfig').style.display='inline-block';
+  await loadConfig();
+};
+function quickLines(text){
+  return String(text||'').split(/\r?\n/).map(line=>line.trim()).filter(line=>line && !line.startsWith('#'));
+}
+function quickParts(line){ return line.split('|').map(x=>x.trim()); }
+function quickStatus(message,isError=false){
+  const node=$('quickSetupStatus');
+  if(node){node.textContent=message;node.style.color=isError?'#b42318':'var(--mut)';}
+  else toast(message);
+}
+function renderQuickSetup(){
+  if(!schoolId()) return;
+  const school=activeSchool()||schools.find(x=>String(x.id)===schoolId())||{};
+  const existingTeachers=cache.teachers||[];
+  const existingSubjects=cache.subjects||[];
+  const existingClasses=cache.classes||[];
+  const existingMappings=cache.mappings||[];
+  const dayText=school.working_days||'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday';
+  const matrix=existingSubjects.length&&existingTeachers.length?`
+    <div class="quick-map-wrap"><table class="quick-map"><thead><tr><th>Subject</th>${existingTeachers.map(t=>`<th>${escapeHtml(t.name)}</th>`).join('')}</tr></thead><tbody>
+    ${existingSubjects.map(subject=>`<tr><td><b>${escapeHtml(subject.name)}</b><br><span style="color:var(--mut)">${Number(subject.weekly_periods)||0} periods/week</span></td>${existingTeachers.map(teacher=>{
+      const exists=existingMappings.some(m=>Number(m.subject_id)===Number(subject.id)&&Number(m.teacher_id)===Number(teacher.id));
+      return `<td><input type="checkbox" data-quick-map="1" data-teacher="${teacher.id}" data-subject="${subject.id}" ${exists?'checked disabled':''} aria-label="Map ${escapeHtml(teacher.name)} to ${escapeHtml(subject.name)}"></td>`;
+    }).join('')}</tr>`).join('')}
+    </tbody></table></div><div class="quick-legend">Checked and disabled boxes are already saved. Select the additional qualified teacher–subject pairs, then save once.</div>`:
+    '<div class="muted-note">Add at least one teacher and one subject to create the assignment grid.</div>';
+  $('configContent').innerHTML=`<div class="quick-wrap">
+    <div class="quick-intro"><b>Enter several records at once — directly in PERIODLY.</b>Paste names or rows into the boxes below. PERIODLY applies common defaults, skips duplicates, and lets you assign teachers to subjects in one grid. No Excel file or separate form for every record.</div>
+    <div class="quick-stats">
+      <div class="quick-stat"><b>${existingClasses.length}</b><span>Classes / Sections</span></div>
+      <div class="quick-stat"><b>${existingTeachers.length}</b><span>Teachers</span></div>
+      <div class="quick-stat"><b>${existingSubjects.length}</b><span>Subjects</span></div>
+      <div class="quick-stat"><b>${existingMappings.length}</b><span>Teacher mappings</span></div>
+      <div class="quick-stat"><b>${(cache.requirements||[]).length}</b><span>Weekly requirements</span></div>
+    </div>
+    <div class="quick-steps">
+      <div class="quick-step"><b>1 · Add lists</b>One line per class, teacher or subject. Defaults fill repeated fields.</div>
+      <div class="quick-step"><b>2 · Assign teachers</b>Tick qualified teacher–subject combinations in one grid.</div>
+      <div class="quick-step"><b>3 · Apply weekly plan</b>Generate missing class-wise weekly requirements automatically.</div>
+    </div>
+    <div class="quick-grid">
+      <section class="quick-card"><h3>👥 Add classes in bulk</h3><p>One row per section. Format: <b>Class name | Section | Student strength</b>. Section and strength are optional.</p>
+        <textarea id="quickClasses" placeholder="Class 1 | A | 40\nClass 1 | B | 38\nClass 2 | A | 42"></textarea>
+        <div class="quick-bottom"><button class="quick-action" id="quickAddClasses">Add classes</button></div>
+      </section>
+      <section class="quick-card"><h3>🧑‍🏫 Add teachers in bulk</h3><p>One teacher name per line. Optional format: <b>Name | Max weekly periods</b>. Available days default to your school's working days.</p>
+        <textarea id="quickTeachers" placeholder="Anita\nRavi | 28\nMeena"></textarea>
+        <div class="quick-fields"><label>Default max periods <input id="quickTeacherMax" type="number" min="1" max="60" value="30"></label></div>
+        <div class="quick-bottom"><button class="quick-action" id="quickAddTeachers">Add teachers</button></div>
+      </section>
+      <section class="quick-card"><h3>📖 Add subjects in bulk</h3><p>One row per subject. Format: <b>Subject | Code | Periods per week | Double?</b>. Defaults: 5 periods, no double period.</p>
+        <textarea id="quickSubjects" placeholder="Mathematics | MATH | 5 | no\nEnglish | ENG | 5 | no\nScience | SCI | 4 | yes"></textarea>
+        <div class="quick-bottom"><button class="quick-action" id="quickAddSubjects">Add subjects</button></div>
+      </section>
+    </div>
+    <section class="quick-card"><h3>🔗 Assign teachers to subjects — one screen</h3><p>Choose all qualified assignments together. Existing mappings are protected and will not be duplicated or removed.</p>
+      ${matrix}
+      <div class="quick-bottom" style="margin-top:12px"><button class="quick-action" id="quickSaveMappings" ${existingTeachers.length&&existingSubjects.length?'':'disabled'}>Save selected mappings</button></div>
+    </section>
+    <section class="quick-card"><h3>📋 Apply weekly requirements automatically</h3><p>For every class section, use each subject's configured weekly periods. Existing class–subject requirements are left unchanged.</p>
+      <div class="quick-bottom"><button class="quick-action secondary" id="quickApplyRequirements" ${existingClasses.length&&existingSubjects.length?'':'disabled'}>Create missing weekly requirements</button><span class="quick-status">No need to add every class–subject combination manually.</span></div>
+    </section>
+    <div class="quick-bottom"><button class="quick-action secondary" id="quickRefresh">Refresh data</button><button class="quick-action" id="quickGenerate">✨ Go to timetable and generate</button><span id="quickSetupStatus" class="quick-status">Defaults: ${escapeHtml(dayText)} · Preferences and room details remain optional.</span></div>
+  </div>`;
+
+  $('quickAddClasses').onclick=()=>quickBulkCreate('classes');
+  $('quickAddTeachers').onclick=()=>quickBulkCreate('teachers');
+  $('quickAddSubjects').onclick=()=>quickBulkCreate('subjects');
+  $('quickSaveMappings').onclick=quickSaveMappings;
+  $('quickApplyRequirements').onclick=quickApplyRequirements;
+  $('quickRefresh').onclick=async()=>{await refreshDashboard();renderQuickSetup();};
+  $('quickGenerate').onclick=async()=>{
+    [...$('nav').children].forEach(x=>x.classList.remove('on'));
+    $('dashboardNav').classList.add('on');
+    currentModule=null;showMain();
+    await refreshDashboard();
+    if(!cache.classes.length||!cache.teachers.length||!cache.subjects.length){toast('Add at least one class, teacher and subject first.');return;}
+    await runAiGeneration({confirmOverwrite:true});
+  };
+}
+async function quickBulkCreate(kind){
+  if(!schoolId()){quickStatus('Select a school first.',true);return;}
+  const textareaId={classes:'quickClasses',teachers:'quickTeachers',subjects:'quickSubjects'}[kind];
+  const lines=quickLines($(textareaId).value);
+  if(!lines.length){quickStatus('Enter at least one line first.',true);return;}
+  const button={classes:'quickAddClasses',teachers:'quickAddTeachers',subjects:'quickAddSubjects'}[kind];
+  $(button).disabled=true;
+  let created=0,skipped=0,failed=0;
+  const school=activeSchool()||{};
+  try{
+    for(const line of lines){
+      const parts=quickParts(line);
+      let payload={},duplicate=false;
+      if(kind==='classes'){
+        const className=parts[0]||'';const section=parts[1]||'A';const strength=Number(parts[2]||0);
+        if(!className||!Number.isFinite(strength)||strength<0){failed++;continue;}
+        duplicate=cache.classes.some(c=>String(c.class_name).toLowerCase()===className.toLowerCase()&&String(c.section).toLowerCase()===section.toLowerCase());
+        payload={school_id:Number(schoolId()),class_name:className,section,strength};
+      }else if(kind==='teachers'){
+        const name=parts[0]||'';const max=Number(parts[1]||$('quickTeacherMax').value||30);
+        if(!name||!Number.isInteger(max)||max<1||max>60){failed++;continue;}
+        duplicate=cache.teachers.some(t=>String(t.name).toLowerCase()===name.toLowerCase());
+        payload={school_id:Number(schoolId()),name,max_periods:max,available_days:school.working_days||'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'};
+      }else{
+        const name=parts[0]||'';const code=parts[1]||name.replace(/[^a-z0-9]/gi,'').slice(0,8).toUpperCase();const weekly=Number(parts[2]||5);const double=/^(yes|y|true|1)$/i.test(parts[3]||'');
+        if(!name||!Number.isInteger(weekly)||weekly<0||weekly>50){failed++;continue;}
+        duplicate=cache.subjects.some(s=>String(s.name).toLowerCase()===name.toLowerCase()||(code&&String(s.code||'').toLowerCase()===code.toLowerCase()));
+        payload={school_id:Number(schoolId()),name,code,weekly_periods:weekly,requires_double:double};
+      }
+      if(duplicate){skipped++;continue;}
+      try{
+        await api('/'+kind,{method:'POST',body:JSON.stringify(payload)});
+        created++;
+        if(kind==='classes')cache.classes.push({id:-Date.now()-created,...payload});
+        if(kind==='teachers')cache.teachers.push({id:-Date.now()-created,...payload});
+        if(kind==='subjects')cache.subjects.push({id:-Date.now()-created,...payload});
+      }catch(err){failed++;console.warn('Quick setup row failed:',line,readableError(err));}
+    }
+    await refreshDashboard();
+    renderQuickSetup();
+    quickStatus(`${kind}: ${created} created, ${skipped} duplicates skipped, ${failed} invalid or failed.`,failed>0);
+    if(created) toast(`${created} ${kind} record(s) added.`);
+  }finally{$(button)?.removeAttribute('disabled');}
+}
+async function quickSaveMappings(){
+  const selected=[...document.querySelectorAll('[data-quick-map]:checked:not(:disabled)')];
+  if(!selected.length){quickStatus('No new mappings selected. Existing mappings are already saved.');return;}
+  $('quickSaveMappings').disabled=true;
+  let created=0,skipped=0,failed=0;
+  for(const box of selected){
+    const payload={teacher_id:Number(box.dataset.teacher),subject_id:Number(box.dataset.subject)};
+    try{await api('/mappings',{method:'POST',body:JSON.stringify(payload)});created++;}
+    catch(err){if(readableError(err).toLowerCase().includes('already exists'))skipped++;else{failed++;console.warn(err);}}
+  }
+  await refreshDashboard();renderQuickSetup();
+  quickStatus(`Mappings: ${created} created, ${skipped} already existed, ${failed} failed.`,failed>0);
+  if(created)toast(`${created} teacher–subject mappings saved.`);
+}
+async function quickApplyRequirements(){
+  const classes=cache.classes||[],subjects=cache.subjects||[],existing=cache.requirements||[];
+  if(!classes.length||!subjects.length){quickStatus('Add at least one class and subject first.',true);return;}
+  if(!confirm(`Create missing weekly requirements for ${classes.length} class section(s) × ${subjects.length} subject(s), using each subject's weekly period setting? Existing requirements will be preserved.`))return;
+  $('quickApplyRequirements').disabled=true;
+  let created=0,skipped=0,failed=0;
+  for(const cls of classes){
+    for(const subject of subjects){
+      const exists=existing.some(r=>Number(r.class_section_id)===Number(cls.id)&&Number(r.subject_id)===Number(subject.id));
+      if(exists){skipped++;continue;}
+      try{
+        await api('/requirements',{method:'POST',body:JSON.stringify({school_id:Number(schoolId()),class_section_id:Number(cls.id),subject_id:Number(subject.id),periods_per_week:Number(subject.weekly_periods)||0})});
+        created++;
+      }catch(err){failed++;console.warn('Requirement creation failed:',readableError(err));}
+    }
+  }
+  await refreshDashboard();renderQuickSetup();
+  quickStatus(`Weekly requirements: ${created} created, ${skipped} existing left unchanged, ${failed} failed.`,failed>0);
+  if(created)toast(`${created} weekly requirements applied.`);
+}
+
+async function loadConfig(){
+  if(currentModule!=='schools' && !schoolId()){
+    // Recover automatically if the user opens a module before school initialization finishes.
+    await loadSchools();
+    if(!schoolId()){
+      $('configContent').innerHTML='<div class="muted-note">No school is selected. The existing school will be selected automatically when the school list loads.</div>';
+      return;
+    }
+  }
+  try{
+    const path=currentEndpoint()+(currentModule==='schools'?'':schoolQuery());
+    const rows=await api(path);
+    cache[currentModule]=rows;
+    renderConfig(rows);
+    await refreshDashboard();
+  }catch(e){
+    const message=readableError(e);
+    console.error(`PERIODLY ${currentModule} load failed:`,e);
+    $('configContent').innerHTML=`<div class="muted-note">Could not load ${escapeHtml(currentModule)}: ${escapeHtml(message)}</div>`;
+  }
+}
+function renderConfig(rows){
+  const moduleHints={
+    teacher_preferences:'These are soft preferences. Enter preferred days or periods, a preferred time of day, and limits for consecutive lessons. Hard teacher availability and conflict rules always take priority.',
+    subject_profiles:'Set subject difficulty from 1 (easy) to 5 (high). Auto time preference favors morning for difficulty 4–5, midday for difficulty 3, and no fixed band for difficulty 1–2. Daily maximum and gap settings are soft distribution preferences.'
+  };
+  const hint=moduleHints[currentModule]?`<div class="muted-note" style="margin-bottom:12px">${escapeHtml(moduleHints[currentModule])}</div>`:'';
+  if(!rows.length){
+    $('configContent').innerHTML=hint+'<div class="muted-note">No records yet. Select “Add New” to create your first record.</div>';
+    return;
+  }
+  const keys=Object.keys(rows[0]).filter(k=>k!=='id' && k!=='school_id');
+  $('configContent').innerHTML=hint+'<table class="config-table"><thead><tr>'+
+    keys.map(k=>`<th>${escapeHtml(k.replaceAll('_',' '))}</th>`).join('')+
+    '<th>Actions</th></tr></thead><tbody>'+
+    rows.map(row=>'<tr>'+keys.map(k=>`<td>${escapeHtml(typeof row[k]==='boolean'?(row[k]?'Yes':'No'):row[k])}</td>`).join('')+
+      `<td><button class="action-btn" data-edit="${row.id}">Edit</button><button class="action-btn" data-delete="${row.id}">Delete</button></td></tr>`).join('')+
+    '</tbody></table>';
+  $('configContent').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openDialog(rows.find(x=>x.id===Number(b.dataset.edit))));
+  $('configContent').querySelectorAll('[data-delete]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('Delete this record?'))return;
+    try{
+      await api(currentEndpoint()+'/'+b.dataset.delete,{method:'DELETE'});
+      toast('Record deleted'); await loadConfig();
+    }catch(e){toast(e.message);}
+  });
+}
+function fieldMarkup([key,label,type],row){
+  const defaults={preferred_time_of_day:'any',max_consecutive_periods:4,difficulty:3,preferred_time_of_day:'any',preferred_time_of_day:'any',preferred_periods:'',preferred_days:'',max_periods_per_day:2,min_gap_days:0};
+  if(type==='select-subject-time-band') defaults.preferred_time_of_day='auto';
+  const value=row?.[key]??defaults[key]??'';
+  if(type==='checkbox') return `<label>${escapeHtml(label)}</label><input name="${key}" type="checkbox" ${value?'checked':''}>`;
+  if(type==='select-teacher'){
+    return `<label>${escapeHtml(label)}</label><select name="${key}" required><option value="">Select teacher</option>${cache.teachers.map(t=>`<option value="${t.id}" ${String(value)===String(t.id)?'selected':''}>${escapeHtml(t.name)} (ID ${t.id})</option>`).join('')}</select>`;
+  }
+  if(type==='select-subject'){
+    return `<label>${escapeHtml(label)}</label><select name="${key}" required><option value="">Select subject</option>${cache.subjects.map(s=>`<option value="${s.id}" ${String(value)===String(s.id)?'selected':''}>${escapeHtml(s.name)} (ID ${s.id})</option>`).join('')}</select>`;
+  }
+  if(type==='select-class'){
+    return `<label>${escapeHtml(label)}</label><select name="${key}" required><option value="">Select class</option>${cache.classes.map(c=>`<option value="${c.id}" ${String(value)===String(c.id)?'selected':''}>${escapeHtml(c.class_name)} - ${escapeHtml(c.section)} (ID ${c.id})</option>`).join('')}</select>`;
+  }
+  if(type==='select-day'){
+    return `<label>${escapeHtml(label)}</label><select name="${key}" required>${days.map(d=>`<option ${value===d?'selected':''}>${d}</option>`).join('')}</select>`;
+  }
+  if(type==='select-time-band' || type==='select-subject-time-band'){
+    const options=type==='select-time-band'?['any','morning','midday','afternoon']:['auto','any','morning','midday','afternoon'];
+    return `<label>${escapeHtml(label)}</label><select name="${key}" required>${options.map(option=>`<option value="${option}" ${String(value)===option?'selected':''}>${option[0].toUpperCase()+option.slice(1)}</option>`).join('')}</select>`;
+  }
+  const optionalText=['preferred_days','preferred_periods'].includes(key);
+  const numberDefaults={max_consecutive_periods:4,difficulty:3,max_periods_per_day:2,min_gap_days:0};
+  const fieldValue=value===''&&numberDefaults[key]!==undefined?numberDefaults[key]:value;
+  const minValue=['max_consecutive_periods','difficulty','max_periods_per_day'].includes(key)?1:0;
+  return `<label>${escapeHtml(label)}</label><input name="${key}" type="${type}" ${type==='number'?`min="${minValue}"`:''} ${optionalText?'':'required'} value="${escapeHtml(fieldValue)}">`;
+}
+function openDialog(row=null){
+  editingId=row?.id??null;
+  $('dialogTitle').textContent=editingId?'Edit record':'Add record';
+  $('formFields').innerHTML=(schemas[currentModule]||[]).map(field=>fieldMarkup(field,row)).join('')+
+    (currentModule!=='schools'?`<input type="hidden" name="school_id" value="${escapeHtml(schoolId())}">`:'');
+  $('configDialog').classList.add('open');
+}
+$('addConfig').onclick=()=>{
+  if(currentModule==='timings'){
+    if(!schoolId()){toast('Select a school first');return;}
+    if(!confirm('Generate the standard 8-period schedule (9:00 AM–4:00 PM) with morning and lunch breaks?'))return;
+    generateDefaultTimings();return;
+  }
+  if(currentModule==='schools' || schoolId()) openDialog();
+  else toast('Select or create a school first');
+};
+async function generateDefaultTimings(){
+  try{
+    const result=await api(`/timings/generate-default/${schoolId()}`,{method:'POST'});
+    toast(`Created ${result.teaching_periods} periods and ${result.breaks} breaks`);
+    await loadConfig();
+  }catch(e){toast(e.message);}
+}
+$('cancelDialog').onclick=()=>$('configDialog').classList.remove('open');
+$('configForm').onsubmit=async e=>{
+  e.preventDefault();
+  const fd=new FormData(e.target),payload={};
+  for(const [key,value] of fd.entries()){
+    const field=(schemas[currentModule]||[]).find(x=>x[0]===key);
+    if(!field)continue;
+    const type=field[2];
+    payload[key]=type==='number'?Number(value):(['select-teacher','select-subject','select-class'].includes(type)?Number(value):value);
+  }
+  for(const [key,,type] of (schemas[currentModule]||[])){
+    if(type==='checkbox')payload[key]=e.target.elements[key].checked;
+  }
+  if(currentModule!=='schools') payload.school_id=Number(schoolId());
+  try{
+    let path;
+    let method;
+    if(editingId){
+      if(specialModules.includes(currentModule)){
+        if(currentModule==='mappings') throw new Error('Mapping edit is not supported yet. Delete it and add the correct mapping.');
+        // Use currentEndpoint() so aliased routes such as teacher-preferences
+        // and subject-profiles match the FastAPI route names.
+        path=`${currentEndpoint()}/${editingId}`;
+      }else{
+        path=`/config/${currentModule}/${editingId}`;
+      }
+      method='PUT';
+    }else{
+      // Special modules may use hyphenated API aliases while their UI keys
+      // use underscores (teacher_preferences -> teacher-preferences).
+      path=specialModules.includes(currentModule)?currentEndpoint():`/${currentModule}`;
+      method='POST';
+    }
+    await api(path,{method,body:JSON.stringify(payload)});
+    $('configDialog').classList.remove('open');
+    toast(editingId?'Changes saved':'Record added successfully');
+    if(currentModule==='schools') await loadSchools(schoolId());
+    await loadConfig();
+  }catch(err){toast(err.message);}
+};
+$('school').onchange=async()=>{
+  const value=String($('school').value||'').trim();
+  selectedSchoolId=/^\d+$/.test(value)?value:'';
+  $('school').value=selectedSchoolId;
+  syncSchoolHeader();
+  if(!schoolId()){
+    timetableEntries=[];
+    selectedEntryId=null;
+    cache.classes=[]; cache.teachers=[]; cache.subjects=[]; cache.rooms=[]; cache.timings=[];
+    render();
+    if(currentModule && currentModule!=='schools'){
+      $('configContent').innerHTML='<div class="muted-note">Select or create a school first.</div>';
+    }
+    return;
+  }
+  await refreshDashboard();
+  if(currentModule && currentModule!=='schools') await loadConfig();
+};
+$('tabs').innerHTML=tabs.map((t,i)=>`<button class="${i===tab?'on':''}" data-i="${i}">${t}</button>`).join('');
+function grid(modeOverride=null){
+  const mode=modeOverride||$('viewBy')?.value||'Class';
+  const timings=(cache.timings||[]).slice().sort((a,b)=>a.period_number-b.period_number);
+  const entityId=$('entityFilter')?.value||'';
+  const section=$('sectionFilter')?.value||'';
+  const selectedSchool=schools.find(s=>String(s.id)===schoolId());
+  const schoolDays=(selectedSchool?.working_days||days.join(',')).split(',').map(x=>x.trim()).filter(Boolean);
+  let entries=(timetableEntries||[]).slice();
+  let heading='All Classes';
+  if(mode==='Teacher'){
+    const selectedTeacher=cache.teachers.find(t=>String(t.id)===String(entityId));
+    if(entityId) entries=entries.filter(e=>String(e.teacher_id)===String(entityId));
+    heading=selectedTeacher?`Teacher: ${selectedTeacher.name}`:'All Teachers';
+  }else{
+    const selectedClass=cache.classes.find(c=>String(c.id)===String(entityId));
+    if(entityId) entries=entries.filter(e=>String(e.class_section_id)===String(entityId));
+    if(section) entries=entries.filter(e=>cache.classes.some(c=>String(c.id)===String(e.class_section_id)&&c.section===section));
+    heading=selectedClass?`Class: ${selectedClass.class_name} - ${selectedClass.section}`:
+      (section?`All classes · Section ${section}`:'All Classes');
+  }
+  const nameBy=(list,id)=>list.find(x=>Number(x.id)===Number(id))?.name||'';
+  const canEdit=editing && mode==='Class' && !!entityId && cache.classes.some(c=>String(c.id)===String(entityId));
+  let h=`<div style="margin:0 0 12px;color:var(--mut);font-weight:600">${escapeHtml(heading)} · ${entries.length} scheduled entries</div>`;
+  if(editing && !canEdit) h+='<div class="muted-note" style="padding:8px 0">To add or edit lessons, choose View By: Class and select one specific class.</div>';
+  h+='<table><tr><th>Period / Time</th>'+schoolDays.map(d=>`<th>${escapeHtml(d.slice(0,3))}</th>`).join('')+'</tr>';
+  const slots=timings.length?timings:Array.from({length:Number(selectedSchool?.periods_per_day)||8},(_,i)=>({period_number:i+1,label:`Period ${i+1}`,start_time:'',end_time:'',is_break:false}));
+  let logicalPeriod=0;
+  for(const slot of slots){
+    if(slot.is_break){
+      h+=`<tr class="brk"><td colspan="${schoolDays.length+1}">☕ ${escapeHtml(slot.label)} (${escapeHtml(slot.start_time)}–${escapeHtml(slot.end_time)})</td></tr>`;
+      continue;
+    }
+    logicalPeriod++;
+    h+=`<tr><td class="p">P${logicalPeriod}<br><small>${escapeHtml(slot.start_time||'')} ${slot.end_time?'– '+escapeHtml(slot.end_time):''}</small></td>`;
+    for(const day of schoolDays){
+      const cellEntries=entries.filter(e=>e.day===day && Number(e.period)===logicalPeriod);
+      const cellClass=canEdit?'timetable-cell':'';
+      h+=`<td class="p ${cellClass}" data-day="${escapeHtml(day)}" data-period="${logicalPeriod}">`;
+      if(!cellEntries.length){
+        h+=`<div class="empty-slot">${canEdit?'＋ Add lesson':'—'}</div>`;
+      }else{
+        h+=cellEntries.map(entry=>{
+          const selected=Number(selectedEntryId)===Number(entry.id);
+          const lockedClass=entry.locked?'locked':'';
+          const selectedClass=selected?'selected':'';
+          let detail='';
+          if(mode==='Teacher'){
+            const cls=cache.classes.find(c=>Number(c.id)===Number(entry.class_section_id));
+            detail=`${(cls?.class_name||'Class')+' '+(cls?.section||'')}`;
+          }else{
+            detail=nameBy(cache.teachers,entry.teacher_id)||'Teacher';
+          }
+          return `<button type="button" class="entry-card ${lockedClass} ${selectedClass}" data-entry-id="${entry.id}" title="${entry.locked?'Locked lesson':'Select lesson'}">${entry.locked?'🔒 ':''}${escapeHtml(nameBy(cache.subjects,entry.subject_id)||'Subject')}<br><small>${escapeHtml(detail)}</small></button>`;
+        }).join('');
+      }
+      h+='</td>';
+    }
+    h+='</tr>';
+  }
+  return h+'</table>';
+}
+function teacherLoadTable(){
+  const a=getAnalytics();
+  if(!a.loads.length) return '<div class="empty">Add teachers and generate a timetable to view teacher workload.</div>';
+  return `<div style="margin:0 0 12px;color:var(--mut);font-weight:600">Assigned teaching periods by teacher</div>
+    <table class="config-table"><thead><tr><th>Teacher</th><th>Assigned Periods</th><th>Maximum Periods</th><th>Remaining Capacity</th><th>Load Status</th></tr></thead><tbody>
+    ${a.loads.map(t=>`<tr><td>${escapeHtml(t.name)}</td><td>${t.assigned}</td><td>${t.max||'Not set'}</td><td>${t.max?Math.max(0,t.max-t.assigned):'—'}</td><td>${t.max&&t.assigned>t.max?'<span style="color:#b4143b;font-weight:700">Over limit</span>':'Within limit'}</td></tr>`).join('')}
+    </tbody></table>`;
+}
+function reportsTable(){
+  const a=getAnalytics();
+  const conflictCount=a.teacherConflicts+a.classConflicts+a.roomConflicts;
+  let h=`<div style="margin-bottom:14px"><b>Timetable validation summary</b></div>
+    <table class="config-table"><thead><tr><th>Validation</th><th>Count</th><th>Status</th></tr></thead><tbody>
+    <tr><td>Teacher double-bookings</td><td>${a.teacherConflicts}</td><td>${a.teacherConflicts?'Review required':'No conflict detected'}</td></tr>
+    <tr><td>Class double-bookings</td><td>${a.classConflicts}</td><td>${a.classConflicts?'Review required':'No conflict detected'}</td></tr>
+    <tr><td>Room double-bookings</td><td>${a.roomConflicts}</td><td>${a.roomConflicts?'Review required':'No conflict detected'}</td></tr>
+    <tr><td>Unallocated weekly periods</td><td>${a.unallocated.reduce((s,x)=>s+x.remaining,0)}</td><td>${a.unallocated.length?'Review requirements':'All configured periods allocated'}</td></tr>
+    </tbody></table>`;
+  h+=`<div style="margin:22px 0 10px"><b>Unallocated class / subject requirements</b></div>`;
+  if(!a.unallocated.length) h+='<div class="muted-note">No unallocated periods found against the subjects’ configured weekly periods.</div>';
+  else h+='<table class="config-table"><thead><tr><th>Class</th><th>Subject</th><th>Required</th><th>Allocated</th><th>Remaining</th></tr></thead><tbody>'+
+    a.unallocated.map(x=>`<tr><td>${escapeHtml(x.className)} - ${escapeHtml(x.section)}</td><td>${escapeHtml(x.subjectName)}</td><td>${x.required}</td><td>${x.allocated}</td><td>${x.remaining}</td></tr>`).join('')+'</tbody></table>';
+  return h;
+}
+function activeSchool(){
+  return schools.find(s=>String(s.id)===schoolId())||null;
+}
+function updateLockButton(){
+  const button=$('lock');
+  if(!button) return;
+  const entry=timetableEntries.find(row=>Number(row.id)===Number(selectedEntryId));
+  button.disabled=!entry;
+  button.style.opacity=entry?1:.55;
+  button.textContent=entry?(entry.locked?'🔓 Unlock Selected':'🔒 Lock Selected'):'🔒 Lock Selected';
+}
+function optionMarkup(list, value, labelFn, placeholder){
+  return `<option value="">${escapeHtml(placeholder)}</option>`+list.map(item=>
+    `<option value="${item.id}" ${String(value??'')===String(item.id)?'selected':''}>${escapeHtml(labelFn(item))}</option>`
+  ).join('');
+}
+function openTimetableDialog({entry=null,day=null,period=null,classId=null}={}){
+  const school=activeSchool();
+  if(!schoolId()||!school){toast('Select a school first');return;}
+  if(entry && entry.locked){toast('This lesson is locked. Unlock it before editing.');return;}
+  const isEdit=!!entry;
+  const chosenClass=isEdit?cache.classes.find(c=>Number(c.id)===Number(entry.class_section_id)):cache.classes.find(c=>Number(c.id)===Number(classId));
+  if(!isEdit && !chosenClass){toast('Select one specific class before adding a lesson.');return;}
+  const workDays=(school.working_days||days.join(',')).split(',').map(x=>x.trim()).filter(Boolean);
+  const periods=Number(school.periods_per_day)||8;
+  const dayOptions=workDays.map(d=>`<option value="${escapeHtml(d)}" ${String(entry?.day??day)===d?'selected':''}>${escapeHtml(d)}</option>`).join('');
+  const periodOptions=Array.from({length:periods},(_,i)=>i+1).map(p=>`<option value="${p}" ${Number(entry?.period??period)===p?'selected':''}>Period ${p}</option>`).join('');
+  $('timetableDialogTitle').textContent=isEdit?'Edit timetable lesson':'Add timetable lesson';
+  $('timetableFormFields').innerHTML=`
+    <label>Class / Section</label><input value="${escapeHtml(chosenClass?.class_name||'')} - ${escapeHtml(chosenClass?.section||'')}" disabled>
+    <label>Day</label><select name="day" required>${dayOptions}</select>
+    <label>Period</label><select name="period" required>${periodOptions}</select>
+    <label>Subject</label><select name="subject_id" required>${optionMarkup(cache.subjects,entry?.subject_id,x=>x.name,'Select subject')}</select>
+    <label>Teacher</label><select name="teacher_id" required>${optionMarkup(cache.teachers,entry?.teacher_id,x=>x.name,'Select teacher')}</select>
+    <label>Room (optional)</label><select name="room_id">${optionMarkup(cache.rooms,entry?.room_id,x=>x.name,'No room assigned')}</select>
+    <div class="muted-note" style="padding:8px 0;text-align:left">PERIODLY will validate teacher qualification, availability, workload, class/teacher/room conflicts and weekly subject limits before saving.</div>`;
+  timetableEditTarget={entryId:entry?.id??null,classId:chosenClass?.id??null};
+  $('timetableDialog').classList.add('open');
+}
+$('cancelTimetableDialog').onclick=()=>$('timetableDialog').classList.remove('open');
+$('timetableForm').onsubmit=async e=>{
+  e.preventDefault();
+  if(!timetableEditTarget)return;
+  const fd=new FormData(e.target);
+  const payload={
+    day:String(fd.get('day')),
+    period:Number(fd.get('period')),
+    subject_id:Number(fd.get('subject_id')),
+    teacher_id:Number(fd.get('teacher_id')),
+    room_id:fd.get('room_id')?Number(fd.get('room_id')):null
+  };
+  try{
+    if(timetableEditTarget.entryId){
+      await api(`/timetable/${timetableEditTarget.entryId}`,{method:'PATCH',body:JSON.stringify(payload)});
+      selectedEntryId=Number(timetableEditTarget.entryId);
+      toast('Timetable lesson updated');
+    }else{
+      payload.school_id=Number(schoolId());
+      payload.class_section_id=Number(timetableEditTarget.classId);
+      await api('/timetable',{method:'POST',body:JSON.stringify(payload)});
+      toast('Timetable lesson added');
+    }
+    $('timetableDialog').classList.remove('open');
+    timetableEditTarget=null;
+    await refreshDashboard();
+  }catch(err){toast(readableError(err));}
+};
+$('view').addEventListener('click',e=>{
+  const card=e.target.closest('[data-entry-id]');
+  if(card){
+    selectedEntryId=Number(card.dataset.entryId);
+    updateLockButton();
+    $('view').querySelectorAll('.entry-card').forEach(el=>el.classList.toggle('selected',Number(el.dataset.entryId)===selectedEntryId));
+    const entry=timetableEntries.find(row=>Number(row.id)===selectedEntryId);
+    if(editing){
+      if(($('viewBy').value||'Class')!=='Class'){toast('Switch to Class view to edit lessons.');return;}
+      if(entry?.locked){toast('This lesson is locked. Unlock it before editing.');return;}
+      openTimetableDialog({entry});
+    }else{
+      toast(entry?.locked?'Locked lesson selected':'Lesson selected. Use Lock Selected or enable Edit Mode.');
+    }
+    return;
+  }
+  const cell=e.target.closest('.timetable-cell');
+  if(cell && editing){
+    if(($('viewBy').value||'Class')!=='Class'){toast('Switch to Class view to add lessons.');return;}
+    const classId=$('entityFilter').value;
+    if(!classId){toast('Select one specific class in the Class filter first.');return;}
+    if(cell.querySelector('[data-entry-id]')){toast('Select the lesson card to edit it.');return;}
+    openTimetableDialog({day:cell.dataset.day,period:Number(cell.dataset.period),classId:Number(classId)});
+  }
+});
+function render(){
+  $('tabs').innerHTML=tabs.map((t,i)=>`<button class="${i===tab?'on':''}" data-i="${i}">${t}</button>`).join('');
+  const views=[
+    ()=>grid(),
+    ()=>teacherLoadTable(),
+    ()=>grid('Class'),
+    ()=>grid('Teacher'),
+    ()=>reportsTable()
+  ];
+  $('view').innerHTML=views[tab]();
+  updateLockButton();
+}
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=Number(b.dataset.i);if(tab===2||tab===3){$('viewBy').value=tab===2?'Class':'Teacher';populateEntityFilter();}render();}};
+document.querySelector('.filters').addEventListener('change',e=>{if(e.target.id==='viewBy')populateEntityFilter();render();});
+$('edit').onclick=function(){
+  editing=!editing;
+  this.classList.toggle('on',editing);
+  document.querySelector('.filters').classList.toggle('editing',editing);
+  this.textContent=editing?'✅ Finish Editing':'✏️ Edit Mode';
+  if(editing){
+    $('viewBy').value='Class';
+    populateEntityFilter();
+    toast('Choose one class, then click an occupied or empty period.');
+  }else{
+    $('timetableDialog').classList.remove('open');
+    toast('Edit mode disabled');
+  }
+  render();
+};
+$('lock').onclick=async function(){
+  const entry=timetableEntries.find(row=>Number(row.id)===Number(selectedEntryId));
+  if(!entry){toast('Select a lesson card first.');return;}
+  try{
+    await api(`/timetable/${entry.id}`,{method:'PATCH',body:JSON.stringify({locked:!entry.locked})});
+    toast(entry.locked?'Lesson unlocked':'Lesson locked and protected from regeneration');
+    await refreshDashboard();
+  }catch(err){toast(readableError(err));}
+};
+function exportFileName(extension){
+  const school=activeSchool();
+  const clean=String(school?.name||'School').replace(/[^A-Za-z0-9_-]+/g,'_').replace(/^_+|_+$/g,'')||'School';
+  return `PERIODLY_${clean}_Timetable.${extension}`;
+}
+async function exportExcelWorkbook(){
+  if(!schoolId()){toast('Select a school first');return;}
+  try{
+    const response=await authorizedFetch(`${API}/export/timetable.xlsx?school_id=${encodeURIComponent(schoolId())}`);
+    if(!response.ok){
+      const data=await response.json().catch(()=>({detail:response.statusText}));
+      const detail=data?.detail??data?.message??data;
+      throw new Error(typeof detail==='string'?detail:JSON.stringify(detail));
+    }
+    const blob=await response.blob();
+    if(!blob.size) throw new Error('The Excel export was empty.');
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url; link.download=exportFileName('xlsx');
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    toast('Excel workbook downloaded.');
+  }catch(err){toast(`Excel export failed: ${readableError(err)}`);}
+}
+function printableSchedulePage(title, subtitle, mode, entityId){
+  const school=activeSchool();
+  const schoolDays=(school?.working_days||days.join(',')).split(',').map(x=>x.trim()).filter(Boolean);
+  const slots=(cache.timings||[]).slice().sort((a,b)=>a.period_number-b.period_number);
+  const scheduleEntries=timetableEntries.filter(entry=>mode==='class'?Number(entry.class_section_id)===Number(entityId):Number(entry.teacher_id)===Number(entityId));
+  const bySlot=new Map();
+  scheduleEntries.forEach(entry=>{
+    const key=`${entry.day}|${Number(entry.period)}`;
+    if(!bySlot.has(key))bySlot.set(key,[]);
+    bySlot.get(key).push(entry);
+  });
+  let logicalPeriod=0;
+  const slotRows=slots.length?slots:Array.from({length:Number(school?.periods_per_day)||8},(_,i)=>({label:`Period ${i+1}`,start_time:'',end_time:'',is_break:false}));
+  const rows=slotRows.map(slot=>{
+    if(slot.is_break){
+      const label=`${escapeHtml(slot.label||'Break')}<small>${escapeHtml(slot.start_time||'')} – ${escapeHtml(slot.end_time||'')}</small>`;
+      return `<tr class="break"><th>${label}</th><td colspan="${schoolDays.length}">BREAK</td></tr>`;
+    }
+    logicalPeriod++;
+    const timing=slots.length?slot:{start_time:'',end_time:'',label:`Period ${logicalPeriod}`};
+    const periodLabel=`P${logicalPeriod}<small>${escapeHtml(timing.start_time||'')} – ${escapeHtml(timing.end_time||'')}</small>`;
+    const cells=schoolDays.map(day=>{
+      const placed=bySlot.get(`${day}|${logicalPeriod}`)||[];
+      if(!placed.length)return '<td class="empty">—</td>';
+      const content=placed.map(entry=>{
+        const subject=cache.subjects.find(x=>Number(x.id)===Number(entry.subject_id));
+        const teacher=cache.teachers.find(x=>Number(x.id)===Number(entry.teacher_id));
+        const cls=cache.classes.find(x=>Number(x.id)===Number(entry.class_section_id));
+        const room=cache.rooms.find(x=>Number(x.id)===Number(entry.room_id));
+        const main=mode==='class'?(subject?.name||'Subject'):`${cls?.class_name||'Class'} ${cls?.section||''}`;
+        const detail=mode==='class'?(teacher?.name||'Teacher'):(subject?.name||'Subject');
+        return `<div class="lesson"><b>${escapeHtml(main)}</b>${detail?`<span>${escapeHtml(detail)}</span>`:''}${room?`<small>Room: ${escapeHtml(room.name)}</small>`:''}${entry.locked?'<small>LOCKED</small>':''}</div>`;
+      }).join('');
+      return `<td>${content}</td>`;
+    }).join('');
+    return `<tr><th>${periodLabel}</th>${cells}</tr>`;
+  }).join('');
+  return `<section class="page"><div class="page-head"><h2>${escapeHtml(title)}</h2><p>${escapeHtml(subtitle)} · ${escapeHtml(school?.academic_year||'')}</p></div><table><thead><tr><th>Period / Time</th>${schoolDays.map(day=>`<th>${escapeHtml(day)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table><footer>Generated by PERIODLY · ${new Date().toLocaleString()}</footer></section>`;
+}
+async function exportPdfPrint(){
+  if(!schoolId()){toast('Select a school first');return;}
+  const printWindow=window.open('','_blank');
+  if(!printWindow){toast('Allow pop-ups for PERIODLY to create the PDF print view.');return;}
+  try{
+    await refreshDashboard();
+    if(!timetableEntries.length){printWindow.close();toast('Generate a timetable before exporting.');return;}
+    const school=activeSchool();
+    const workload=cache.teachers.map(teacher=>({
+      name:teacher.name, assigned:timetableEntries.filter(entry=>Number(entry.teacher_id)===Number(teacher.id)).length,
+      max:Number(teacher.max_periods)||0
+    }));
+    const classPages=cache.classes.map(cls=>printableSchedulePage(
+      `${cls.class_name} – Section ${cls.section}`,'Class-wise timetable','class',cls.id));
+    const teacherPages=cache.teachers.map(teacher=>printableSchedulePage(
+      teacher.name,'Teacher-wise timetable','teacher',teacher.id));
+    const report=`<section class="page cover"><h1>PERIODLY</h1><h2>School Timetable Report</h2>
+      <p><b>School:</b> ${escapeHtml(school?.name||'')}<br><b>Academic year:</b> ${escapeHtml(school?.academic_year||'')}<br><b>Working days:</b> ${escapeHtml(school?.working_days||'')}<br><b>Generated:</b> ${new Date().toLocaleString()}</p>
+      <div class="summary"><div><b>${cache.classes.length}</b><span>Classes / Sections</span></div><div><b>${cache.teachers.length}</b><span>Teachers</span></div><div><b>${cache.subjects.length}</b><span>Subjects</span></div><div><b>${timetableEntries.length}</b><span>Scheduled lessons</span></div><div><b>${timetableEntries.filter(x=>x.locked).length}</b><span>Locked lessons</span></div></div>
+      <h3>Teacher workload</h3><table class="workload"><thead><tr><th>Teacher</th><th>Scheduled periods</th><th>Maximum per week</th><th>Remaining capacity</th></tr></thead><tbody>${workload.map(item=>`<tr><td>${escapeHtml(item.name)}</td><td>${item.assigned}</td><td>${item.max||'—'}</td><td>${item.max?Math.max(0,item.max-item.assigned):'—'}</td></tr>`).join('')}</tbody></table>
+      <p class="note">Please verify teacher assignments, room allocation and school requirements before publishing.</p><footer>Generated by PERIODLY</footer></section>`;
+    const printHtml=`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(exportFileName('pdf'))}</title><style>
+      @page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{font:10px Arial,sans-serif;color:#14223f;margin:0}h1{font-size:32px;color:#173b83;margin:0 0 8px}h2{font-size:20px;margin:0 0 5px}h3{font-size:14px;margin:22px 0 8px}.page{page-break-after:always;break-after:page;padding:2mm 0;min-height:180mm}.page:last-child{page-break-after:auto;break-after:auto}.cover{padding:15mm}.cover>p{font-size:12px;line-height:1.7}.summary{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.summary div{border:1px solid #d8e0ee;border-radius:6px;padding:10px 15px;min-width:110px}.summary b{display:block;font-size:21px;color:#173b83}.summary span{color:#65738d;font-size:10px}.page-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}.page-head h2{font-size:17px}.page-head p{margin:0;color:#64718b}table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{border:1px solid #cbd5e1;padding:6px 5px;vertical-align:top;overflow-wrap:anywhere}thead th{background:#173b83;color:white;text-align:center;font-size:10px}.page table>tbody>tr>th{width:76px;background:#eef3fb;text-align:left}.page td{height:62px;text-align:center}.lesson{border:1px solid #d8e2f1;border-radius:5px;background:#f4f7fc;padding:5px;margin:1px;font-size:9px}.lesson b,.lesson span,.lesson small{display:block}.lesson span{margin-top:3px;color:#53627c}.lesson small{margin-top:2px;color:#64718b}.empty{color:#9aa5b8}.break th,.break td{background:#f0edff;color:#564b91;height:auto;text-align:center}.break small,th small{display:block;font-weight:400;margin-top:3px}.workload{table-layout:auto}.workload td,.workload th{height:auto;text-align:left}.note{margin-top:22px;color:#64718b}footer{margin-top:12px;color:#8993a6;text-align:right;font-size:8px}@media screen{body{background:#edf1f7;padding:20px}.page{background:white;max-width:1100px;margin:0 auto 20px;padding:20px;box-shadow:0 2px 10px #0001}}
+      </style></head><body>${report}${classPages.join('')}${teacherPages.join('')}<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),450));<\/script></body></html>`;
+    printWindow.document.open();
+    printWindow.document.write(printHtml);
+    printWindow.document.close();
+    toast('Print view ready. Choose “Save as PDF” as the printer.');
+  }catch(err){printWindow.close();toast(`PDF export failed: ${readableError(err)}`);}
+}
+$('expBtn').onclick=e=>{e.stopPropagation();$('drop').classList.toggle('open');};
+$('drop').onclick=async e=>{
+  e.stopPropagation();
+  const action=e.target.closest('[data-export]');
+  if(!action)return;
+  $('drop').classList.remove('open');
+  if(action.dataset.export==='excel') await exportExcelWorkbook();
+  else if(action.dataset.export==='pdf') await exportPdfPrint();
+};
+document.onclick=e=>{if(!e.target.closest('.menu'))$('drop').classList.remove('open');};
+function renderGenerationReport(result, preflight=null){
+  const panel=$('generationReport');
+  const required=Number(result.required_periods)||0;
+  const allocated=Number(result.allocated_periods)||0;
+  const missing=Number(result.unallocated_periods)||0;
+  const percent=required?Math.round((allocated/required)*100):100;
+  const unallocated=Array.isArray(result.unallocated)?result.unallocated:[];
+  const warningItems=[];
+  if(preflight?.warnings?.length) warningItems.push(...preflight.warnings);
+  if(result.locked_conflicts?.length) warningItems.push(`${result.locked_conflicts.length} conflict(s) were detected among locked lessons. Review those entries before publishing.`);
+  if(missing && !unallocated.length) warningItems.push(`${missing} period(s) remain unallocated. Review the generation response and school constraints.`);
+
+  const unallocatedTable=unallocated.length?`<div class="report-table-wrap"><table><thead><tr><th>Class</th><th>Subject</th><th>Required</th><th>Allocated</th><th>Remaining</th><th>Reason</th></tr></thead><tbody>${unallocated.map(item=>`<tr><td>${escapeHtml(item.class_name||'')} - ${escapeHtml(item.section||'')}</td><td>${escapeHtml(item.subject_name||'')}</td><td>${Number(item.required)||0}</td><td>${Number(item.allocated)||0}</td><td class="warn">${Number(item.remaining)||0}</td><td>${escapeHtml(item.reason||'No feasible slot found.')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="report-note ok">All configured weekly subject requirements were allocated.</div>';
+
+  const solverStatus=String(result.solver_status||'UNKNOWN');
+  const solverLabel=solverStatus==='OPTIMAL'?'Optimal solution':solverStatus==='FEASIBLE'?'Feasible solution':'Solver stopped';
+  panel.innerHTML=`<div class="report-head"><h3>✨ AI Timetable Generation Report</h3><button class="report-close" id="closeGenerationReport">Close</button></div>
+    <div class="report-note"><b>${percent===100?'Generation complete':'Generation completed with unallocated periods'}</b> · ${percent}% of required periods allocated · ${escapeHtml(solverLabel)} (${escapeHtml(solverStatus)}) · ${escapeHtml(result.algorithm||'CP-SAT optimizer')}</div>
+    <div class="report-note">${result.optimal?'The solver proved the maximum possible allocation and completed preference optimization.':`Solver time limit: ${Number(result.time_limit_seconds)||20} seconds. The timetable is feasible; a longer optimization run may improve it.`}</div>
+    ${result.soft_preferences_applied?`<div class="report-note">Soft preferences used: ${Number(result.soft_preferences_applied.teacher_profiles)||0} teacher profile(s), ${Number(result.soft_preferences_applied.subject_profiles)||0} subject profile(s). Preferences guide choices but do not override hard constraints.</div>`:''}
+    <div class="report-metrics">
+      <div class="metric"><b>${allocated}</b><span>Periods allocated</span></div>
+      <div class="metric"><b>${missing}</b><span>Periods unallocated</span></div>
+      <div class="metric"><b>${Number(result.created)||0}</b><span>New lessons created</span></div>
+      <div class="metric"><b>${Number(result.locked_preserved)||0}</b><span>Locked lessons preserved</span></div>
+    </div>
+    ${warningItems.length?`<div><b>Items to review</b><ul class="report-warnings">${warningItems.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div>`:''}
+    <div style="margin:14px 0 9px"><b>Unallocated requirements</b></div>${unallocatedTable}
+    <div class="report-note">${escapeHtml(result.note||'Review all constraints and verify the timetable before publishing.')}</div>`;
+  panel.style.display='block';
+  $('closeGenerationReport').onclick=()=>{panel.style.display='none';};
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function showGeneratedTimetable(){
+  // Always return the user to the live timetable after the server saves a new plan.
+  currentModule=null;
+  editingId=null;
+  if(typeof tab!=='undefined') tab=0;
+  if($('dashboardNav')){
+    [...$('nav').children].forEach(node=>node.classList.remove('on'));
+    $('dashboardNav').classList.add('on');
+  }
+  showMain();
+  if($('viewBy')) $('viewBy').value='Class';
+  populateEntityFilter();
+  if($('entityFilter') && cache.classes?.length){
+    $('entityFilter').value=String(cache.classes[0].id);
+  }
+  if($('sectionFilter')) $('sectionFilter').value='';
+  render();
+}
+
+async function runAiGeneration({confirmOverwrite=true}={}){
+  if(!schoolId()){toast('Select a school first');return;}
+  const button=document.querySelector('.btn.gen');
+  const previousText=button.textContent;
+  if(button.disabled)return;
+  button.disabled=true;
+  button.textContent='⏳ Checking live school data...';
+  try{
+    const preflight=await api(`/generate/preflight/${schoolId()}`);
+    if(confirmOverwrite){
+      const unlockedCount=timetableEntries.filter(entry=>!entry.locked).length;
+      const lockedCount=timetableEntries.filter(entry=>entry.locked).length;
+      let message='Generate a new timetable from the current saved school data?';
+      if(unlockedCount){message=`This will replace ${unlockedCount} existing unlocked lesson(s). ${lockedCount} locked lesson(s) will be preserved. Continue?`;}
+      if(preflight.warnings?.length){message+='\n\nReadiness warnings:\n- '+preflight.warnings.join('\n- ')+'\n\nThe scheduler will attempt to allocate all feasible periods.';}
+      if(!confirm(message))return;
+    }
+    const timeLimit=Number($('optimizationAttempts')?.value)||20;
+    button.textContent=`🤖 Optimizing full school timetable (up to ${timeLimit} sec)...`;
+    const result=await api(`/generate/${schoolId()}?time_limit_seconds=${timeLimit}`,{method:'POST'});
+    // The POST endpoint commits the newly generated lessons to the selected school's DB.
+    // Reload from GET /timetable so the grid shows the persisted, live result, not a local preview.
+    await refreshDashboard();
+    showGeneratedTimetable();
+    renderGenerationReport(result,preflight);
+    toast(`Live timetable saved: ${result.allocated_periods}/${result.required_periods} periods allocated.`);
+  }catch(err){
+    toast(readableError(err));
+  }finally{
+    button.disabled=false;
+    button.textContent=previousText;
+  }
+}
+
+const generateButton=document.querySelector('.btn.gen');
+generateButton.onclick=()=>runAiGeneration({confirmOverwrite:true});
+$('regenerate').onclick=async()=>{
+  if(!schoolId()){toast('Select a school first');return;}
+  const unlockedCount=timetableEntries.filter(entry=>!entry.locked).length;
+  const lockedCount=timetableEntries.filter(entry=>entry.locked).length;
+  if(!confirm(`Run AI regeneration? ${unlockedCount} unlocked lesson(s) will be replaced; ${lockedCount} locked lesson(s) will be preserved.`))return;
+  await runAiGeneration({confirmOverwrite:false});
+};
+document.querySelector('.btn.save').onclick=()=>toast('Your configuration is saved automatically to the PERIODLY database.');
+populateEntityFilter();
+render();
+(async()=>{ await loadSchools(); })();
+</script></body></html>

@@ -1,0 +1,49 @@
+# Python
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Local databases and backups (never commit school records)
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/*.db-wal
+**/*.db-shm
+**/*.db.*
+**/*.sqlite.*
+**/*.backup*
+**/*_backup*
+**/*before_*.db
+
+# Logs, exports and generated artifacts
+**/*.log
+**/*.xlsx
+**/*.xls
+**/*.pdf
+**/*.csv
+**/exports/
+**/uploads/
+node_modules/
+dist/
+.next/
+coverage/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

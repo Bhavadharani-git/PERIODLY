@@ -1,0 +1,30 @@
+name: PERIODLY CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Install dependencies
+        run: python -m pip install -r backend/requirements-dev.txt
+      - name: Apply baseline database migration
+        working-directory: backend
+        run: DATABASE_URL=sqlite:///periodly_ci.db python -m alembic upgrade head
+      - name: Compile backend
+        working-directory: backend
+        run: python -m compileall -q app tests
+      - name: Run tests
+        working-directory: backend
+        run: python -m pytest -q
+
+      - name: Build production Docker image
+        run: docker build -t periodly:ci .

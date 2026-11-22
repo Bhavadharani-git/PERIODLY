@@ -1,0 +1,27 @@
+# Source control and local environments
+.git
+**/.venv
+**/venv
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Secrets and school data
+.env
+.env.*
+**/.env
+**/.env.*
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/*.db-wal
+**/*.db-shm
+**/*backup*
+**/exports
+**/uploads
+
+# Local build outputs
+node_modules
+**/*.log
